@@ -3,13 +3,11 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
-#include <vector>
 
 using std::abs;
 using std::cout;
 using std::cin;
 using std::endl;
-using std::vector;
 
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char* string);
 int**newArray();
@@ -17,7 +15,6 @@ void deletePunteros(int** arreglo, int size);
 void llenarMatriz(int** array, int size);
 void imprimirTablero(int** array, int size);
 bool validacionPieza(int** array, int x, int y, int jugador);
-int cambioANumero(char letra);
 bool movimientoValido(int** array, int posX, int posY, int movX, int movY);
 bool movimientoPeon(int** array, int posX, int posY, int movX, int movY, int bandera, int jugador);
 bool movimientoTorre(int** array, int posX, int posY, int movX, int movY, int jugador);
@@ -25,6 +22,11 @@ bool movimientoAlfil(int** array, int posX, int posY, int movX, int movY, int ju
 bool movimientoCaballo(int** array, int posX, int posY, int movX, int movY, int jugador);
 bool movimientoReina(int** array, int posX, int posY, int movX, int movY, int jugador);
 bool movimientoRey(int** array, int posX, int posY, int movX, int movY, int jugador);
+char* movimientoTodos(int numTurnos);
+void deleteMov(char* movimiento);
+void moverTexto(char* movimiento, int turno, int numTurnos);
+int verificarPosicionX(char* posicionX);
+int verificarPosicionY(char* posicionY);
 
 int main(int argc, char *argv[]){
 	initscr();
@@ -42,304 +44,189 @@ int main(int argc, char *argv[]){
 		bool win=false;
 		int size=8, bandera=1;	
 		int** tablero=newArray();
-		vector<int>piezas;
 		llenarMatriz(tablero, size);
-		int posX, posY, movX, movY;
+		char* agregarPiezas=movimientoTodos(5);
 		do{
 			if (bandera==1){
 				imprimirTablero(tablero, size);
 				refresh();
+				moverTexto(agregarPiezas, 1, 5);
+				agregarPiezas[0]=verificarPosicionX(agregarPiezas);
+				agregarPiezas[1]=verificarPosicionY(agregarPiezas);
+				agregarPiezas[2]=verificarPosicionX(agregarPiezas);
+				agregarPiezas[3]=verificarPosicionY(agregarPiezas);
 				print_in_middle(stdscr, LINES / 2+6, -4, 0, strcpy(string,"JUGADOR 1: "));
 				print_in_middle(stdscr, LINES / 2+7, -4, 0, strcpy(string,"Ingrese Pieza a Mover: "));
-				char temp= getch();
-				noecho();
-				if (temp == '1' || temp == '2' ||temp == '3' ||temp == '4' ||temp == '5' ||temp == '6' ||temp == '7' ||temp == '8' ){
+				if (validacionPieza(tablero, agregarPiezas[0], agregarPiezas[1], 1)==true){
+					print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"No hay pieza suya en esa posicion "));
+					getch();
+					clear();
 					echo();
-					posX=cambioANumero(temp);
-					piezas.push_back(posX);
-					char temp2=getch();
+				}else if(validacionPieza(tablero, agregarPiezas[0], agregarPiezas[1], 1)==false){
+					print_in_middle(stdscr, LINES / 2+8, -4, 0, strcpy(string,"Ingrese Posicion: "));
 					noecho();
-					if (temp2 == '1' || temp2 == '2' ||temp2 == '3' ||temp2 == '4' ||temp2 == '5' ||temp2 == '6' ||temp2 == '7' ||temp2 == '8' ){
+					bool validarMov= movimientoValido(tablero, agregarPiezas[0],agregarPiezas[1],agregarPiezas[2],agregarPiezas[3]);
+					//cout<<agregarPiezas[0]<<"  "<<agregarPiezas[1]<<"  "<<agregarPiezas[2]<<"  "<<agregarPiezas[3]<<endl;
+					//cout<<validarMov<<endl;
+					if (validarMov==false){
+						print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"Movimiento invalido "));
+						getch();
+						clear();
 						echo();
-						posY=cambioANumero(temp2);
-						piezas.push_back(posY);
-						//noecho();
-						if (validacionPieza(tablero, piezas.at(0), piezas.at(1), 1)==true){
-							print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"No hay pieza suya en esa posicion "));
-							getch();
-							clear();
-							piezas.erase(piezas.begin());
-							piezas.erase(piezas.begin());
-							echo();
-						}else if(validacionPieza(tablero, piezas.at(0), piezas.at(1), 1)==false){
-							print_in_middle(stdscr, LINES / 2+8, -4, 0, strcpy(string,"Ingrese Posicion: "));
-							char temp3= getch();
-							noecho();
-							if (temp3 == '1' || temp3 == '2' ||temp3 == '3' ||temp3 == '4' ||temp3 == '5' ||temp3 == '6' ||temp3 == '7' ||temp3 == '8' ){
-								echo();
-								movX=cambioANumero(temp3);
-								piezas.push_back(movX);
-								char temp4=getch();
-								noecho();
-								if (temp4 == '1' || temp4 == '2' ||temp4 == '3' ||temp4 == '4' ||temp4 == '5' ||temp4 == '6' ||temp4 == '7' ||temp4 == '8' ){
-									echo();
-									movY=cambioANumero(temp4);
-									piezas.push_back(movY);
-									noecho();
-									bool validarMov= movimientoValido(tablero, piezas.at(0),piezas.at(1),piezas.at(2),piezas.at(3));
-									cout<<piezas.at(0)<<"  "<<piezas.at(1)<<"  "<<piezas.at(2)<<"  "<<piezas.at(3)<<endl;
-									cout<<validarMov<<endl;
-									if (validarMov==false){
-										print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"Movimiento invalido "));
-										getch();
-										clear();
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										echo();
-									}else if(validarMov==true){
-										if (tablero[posX][posY]==1){
-											bool torre=movimientoTorre(tablero, posX, posY, movX, movY, 1);
-											cout<<torre<<endl;
-											if (torre==true){
-												tablero[movX][movY]=1;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==2){
-											bool alfil=movimientoAlfil(tablero, posX, posY, movX, movY, 1);
-											cout<<alfil<<endl;
-											if (alfil==true){
-												tablero[movX][movY]=2;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==3){
-											bool caballo=movimientoCaballo(tablero, posX, posY, movX, movY, 1);
-											cout<<caballo<<endl;
-											if (caballo==true){
-												tablero[movX][movY]=3;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==4){
-											bool reina=movimientoReina(tablero, posX, posY, movX, movY, 1);
-											cout<<reina<<endl;
-											if (reina==true){
-												tablero[movX][movY]=4;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==5){
-											bool rey=movimientoRey(tablero, posX, posY, movX, movY, 1);
-											cout<<rey<<endl;
-											if (rey==true){
-												tablero[movX][movY]=5;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==6){
-											if (posX==6){
-												bool peon=movimientoPeon(tablero, posX, posY, movX, movY, 1,1);
-												cout<<peon<<endl;
-												if (peon==true){
-													tablero[movX][movY]=6;
-													tablero[posX][posY]=0;
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													bandera=2;
-												}
-											}else{
-												bool peon=movimientoPeon(tablero, posX, posY, movX, movY, 0,1);
-												cout<<peon<<endl;
-												if (peon==true){
-													tablero[movX][movY]=6;
-													tablero[posX][posY]=0;
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													bandera=2;
-												}
-											}
-										} 
-									}
+					}else if(validarMov==true){
+						if (tablero[agregarPiezas[0]][agregarPiezas[1]]==1){
+							bool torre=movimientoTorre(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<torre<<endl;
+							if (torre==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=1;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==2){
+							bool alfil=movimientoAlfil(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<alfil<<endl;
+							if (alfil==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=2;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==3){
+							bool caballo=movimientoCaballo(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<caballo<<endl;
+							if (caballo==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=3;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==4){
+							bool reina=movimientoReina(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<reina<<endl;
+							if (reina==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=4;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==5){
+							bool rey=movimientoRey(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<rey<<endl;
+							if (rey==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=5;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==6){
+							if (agregarPiezas[0]==6){
+								bool peon=movimientoPeon(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1,1);
+								//cout<<peon<<endl;
+								if (peon==true){
+									tablero[agregarPiezas[2]][agregarPiezas[3]]=6;
+									tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+									bandera=2;
+								}
+							}else{
+								bool peon=movimientoPeon(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 0,1);
+								//cout<<peon<<endl;
+								if (peon==true){
+									tablero[agregarPiezas[2]][agregarPiezas[3]]=6;
+									tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+									bandera=2;
 								}
 							}
-						}
+						} 
 					}
 				}
 			}else if (bandera==2){
 				imprimirTablero(tablero, size);
 				refresh();
+				moverTexto(agregarPiezas, 1, 5);
+				agregarPiezas[0]=verificarPosicionX(agregarPiezas);
+				agregarPiezas[1]=verificarPosicionY(agregarPiezas);
+				agregarPiezas[2]=verificarPosicionX(agregarPiezas);
+				agregarPiezas[3]=verificarPosicionY(agregarPiezas);
 				print_in_middle(stdscr, LINES / 2+6, -4, 0, strcpy(string,"JUGADOR 2: "));
 				print_in_middle(stdscr, LINES / 2+7, -4, 0, strcpy(string,"Ingrese Pieza a Mover: "));
-				char temp5= getch();
-				noecho();
-				if (temp5 == '1' || temp5 == '2' ||temp5 == '3' ||temp5 == '4' ||temp5 == '5' ||temp5 == '6' ||temp5 == '7' ||temp5 == '8' ){
+				if (validacionPieza(tablero, agregarPiezas[0], agregarPiezas[1], 2)==true){
+					print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"No hay pieza suya en esa posicion "));
+					getch();
+					clear();
 					echo();
-					posX=cambioANumero(temp5);
-					piezas.push_back(posX);
-					char temp6=getch();
+				}else if(validacionPieza(tablero, agregarPiezas[0], agregarPiezas[1], 2)==false){
+					moverTexto(agregarPiezas, 2, 5);
+					print_in_middle(stdscr, LINES / 2+8, -4, 0, strcpy(string,"Ingrese Posicion: "));
 					noecho();
-					if (temp6 == '1' || temp6 == '2' ||temp6 == '3' ||temp6 == '4' ||temp6 == '5' ||temp6 == '6' ||temp6 == '7' ||temp6 == '8' ){
+					bool validarMov= movimientoValido(tablero, agregarPiezas[0],agregarPiezas[1],agregarPiezas[2],agregarPiezas[3]);
+					//cout<<agregarPiezas[0]<<"  "<<agregarPiezas[1]<<"  "<<agregarPiezas[2]<<"  "<<agregarPiezas[3]<<endl;
+					//cout<<validarMov<<endl;
+					if (validarMov==false){
+						print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"Movimiento invalido "));
+						getch();
+						clear();
 						echo();
-						posY=cambioANumero(temp6);
-						piezas.push_back(posY);
-						//noecho();
-						if (validacionPieza(tablero, piezas.at(0), piezas.at(1), 1)==true){
-							print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"No hay pieza suya en esa posicion "));
-							getch();
-							clear();
-							piezas.erase(piezas.begin());
-							piezas.erase(piezas.begin());
-							echo();
-						}else if(validacionPieza(tablero, piezas.at(0), piezas.at(1), 1)==false){
-							print_in_middle(stdscr, LINES / 2+8, -4, 0, strcpy(string,"Ingrese Posicion: "));
-							char temp7= getch();
-							noecho();
-							if (temp7 == '1' || temp7 == '2' ||temp7 == '3' ||temp7 == '4' ||temp7 == '5' ||temp7 == '6' ||temp7 == '7' ||temp7 == '8' ){
-								echo();
-								movX=cambioANumero(temp7);
-								piezas.push_back(movX);
-								char temp8=getch();
-								noecho();
-								if (temp8 == '1' || temp8 == '2' ||temp8 == '3' ||temp8 == '4' ||temp8 == '5' ||temp8 == '6' ||temp8 == '7' ||temp8 == '8' ){
-									echo();
-									movY=cambioANumero(temp8);
-									piezas.push_back(movY);
-									noecho();
-									bool validarMov= movimientoValido(tablero, piezas.at(0),piezas.at(1),piezas.at(2),piezas.at(3));
-									cout<<piezas.at(0)<<"  "<<piezas.at(1)<<"  "<<piezas.at(2)<<"  "<<piezas.at(3)<<endl;
-									cout<<validarMov<<endl;
-									if (validarMov==false){
-										print_in_middle(stdscr, LINES / 2+10, -4, 0, strcpy(string,"Movimiento invalido "));
-										getch();
-										clear();
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										piezas.erase(piezas.begin());
-										echo();
-									}else if(validarMov==true){
-										if (tablero[posX][posY]==1){
-											bool torre=movimientoTorre(tablero, posX, posY, movX, movY, 2);
-											cout<<torre<<endl;
-											if (torre==true){
-												tablero[movX][movY]=7;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=1;
-											}
-										}else if (tablero[posX][posY]==2){
-											bool alfil=movimientoAlfil(tablero, posX, posY, movX, movY, 2);
-											cout<<alfil<<endl;
-											if (alfil==true){
-												tablero[movX][movY]=8;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=1;
-											}
-										}else if (tablero[posX][posY]==3){
-											bool caballo=movimientoCaballo(tablero, posX, posY, movX, movY, 2);
-											cout<<caballo<<endl;
-											if (caballo==true){
-												tablero[movX][movY]=9;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=1;
-											}
-										}else if (tablero[posX][posY]==4){
-											bool reina=movimientoReina(tablero, posX, posY, movX, movY, 2);
-											cout<<reina<<endl;
-											if (reina==true){
-												tablero[movX][movY]=10;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=1;
-											}
-										}else if (tablero[posX][posY]==5){
-											bool rey=movimientoRey(tablero, posX, posY, movX, movY, 2);
-											cout<<rey<<endl;
-											if (rey==true){
-												tablero[movX][movY]=11;
-												tablero[posX][posY]=0;
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												piezas.erase(piezas.begin());
-												bandera=2;
-											}
-										}else if (tablero[posX][posY]==6){
-											if (posX==6){
-												bool peon=movimientoPeon(tablero, posX, posY, movX, movY, 1,2);
-												cout<<peon<<endl;
-												if (peon==true){
-													tablero[movX][movY]=12;
-													tablero[posX][posY]=0;
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													bandera=1;
-												}
-											}else{
-												bool peon=movimientoPeon(tablero, posX, posY, movX, movY, 0,2);
-												cout<<peon<<endl;
-												if (peon==true){
-													tablero[movX][movY]=12;
-													tablero[posX][posY]=0;
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													piezas.erase(piezas.begin());
-													bandera=1;
-												}
-											}
-										} 
-									}
+					}else if(validarMov==true){
+						if (tablero[agregarPiezas[0]][agregarPiezas[1]]==7){
+							bool torre=movimientoTorre(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<torre<<endl;
+							if (torre==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=7;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==8){
+							bool alfil=movimientoAlfil(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<alfil<<endl;
+							if (alfil==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=8;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==9){
+							bool caballo=movimientoCaballo(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<caballo<<endl;
+							if (caballo==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=9;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==10){
+							bool reina=movimientoReina(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<reina<<endl;
+							if (reina==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=10;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==11){
+							bool rey=movimientoRey(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
+							//cout<<rey<<endl;
+							if (rey==true){
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=11;
+								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+								bandera=2;
+							}
+						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==12){
+							if (agregarPiezas[0]==12){
+								bool peon=movimientoPeon(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1,1);
+								//cout<<peon<<endl;
+								if (peon==true){
+									tablero[agregarPiezas[2]][agregarPiezas[3]]=12;
+									tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+									bandera=2;
+								}
+							}else{
+								bool peon=movimientoPeon(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 0,1);
+								//cout<<peon<<endl;
+								if (peon==true){
+									tablero[agregarPiezas[2]][agregarPiezas[3]]=12;
+									tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
+									bandera=2;
 								}
 							}
-						}
+						} 
 					}
 				}
 			}
 		}while(win==false);
+		deleteMov(agregarPiezas);
 		deletePunteros(tablero, size);
 	}		
 }
@@ -390,13 +277,13 @@ void llenarMatriz(int** array, int size){
 		}	
 	}
 	array[size-1][0] = array[size-1][size-1] = 1;
-	array[size-1][1] = array[size-1][size-2] = 2;
-	array[size-1][2] = array[size-1][size-3] = 3;
+	array[size-1][1] = array[size-1][size-2] = 3;
+	array[size-1][2] = array[size-1][size-3] = 2;
 	array[size-1][size-4] = 4;
 	array[size-1][size-5] = 5;
 	array[0][0] = array[0][size-1] = 7;
-	array[0][1] = array[0][size-2] = 8;
-	array[0][2] = array[0][size-3] = 9;
+	array[0][1] = array[0][size-2] = 9;
+	array[0][2] = array[0][size-3] = 8;
 	array[0][4] = 10;	
 	array[0][3] = 11;
 }
@@ -463,27 +350,6 @@ bool validacionPieza(int** array, int x, int y, int jugador){
 		}
 	}
 	return false;
-}
-int cambioANumero(char letra){
-	int posX;
-	if (letra=='8'){
-		posX=7;
-	}else if (letra=='7'){
-		posX=6;
-	}else if (letra=='6'){
-		posX=5;
-	}else if (letra=='5'){
-		posX=4;
-	}else if (letra=='4'){
-		posX=3;
-	}else if (letra=='3'){
-		posX=2;
-	}else if (letra=='2'){
-		posX=1;
-	}else if (letra=='1'){
-		posX=0;
-	}
-	return posX;
 }
 bool movimientoValido(int** array, int posX, int posY, int movX, int movY){
 	int absX = posY - movY;
@@ -606,3 +472,71 @@ bool movimientoRey(int** array, int posX, int posY, int movX, int movY, int juga
     }
     return false;
 }
+char* movimientoTodos(int numTurnos){
+    char* movimiento = new char[numTurnos]; 
+    return movimiento;
+}
+void moverTexto(char* movimiento, int turno, int numTurnos){
+	int contador = 0;
+    while(contador < (numTurnos -1)){
+        noecho();
+        char temp;
+        temp = getch();
+        if(((temp >= 65 && temp <= 72) || (temp >= 97 && temp <= 104)) && ((contador == 0) || contador ==2) ){
+            echo();
+            addch(temp);
+            movimiento[contador] = temp;
+            contador++;
+        }
+        if((temp >= '1' && temp <= '8') && ((contador == 1) || contador==3)){
+            echo();
+            addch(temp);
+            movimiento[contador] = temp;
+            contador++;
+        }
+    }
+    movimiento[numTurnos] = '\0';
+}
+void deleteMov(char* movimiento){    
+    delete [] movimiento;
+}
+int verificarPosicionX(char* posicionX){//evitar segmentation fault
+    char posiblesX[] = {'a','A','b','B','c','C','d','D','e','E','f','F','g','G','h','H','\0'};
+    if ((posicionX[2]== posiblesX[0] || posicionX[2]==posiblesX[1])){
+        return 0;
+    }else if ((posicionX[2] == posiblesX[2] || posicionX[2] == posiblesX[3])){
+        return 1;
+    }else if ((posicionX[2] == posiblesX[4] || posicionX[2] == posiblesX[5])){
+        return 2;
+    }else if ((posicionX[2] == posiblesX[6] || posicionX[2] == posiblesX[7])){
+        return 3;
+    }else if ((posicionX[2] == posiblesX[8] || posicionX[2] == posiblesX[9])){
+        return 4;
+    }else if ((posicionX[2] == posiblesX[10] || posicionX[2] == posiblesX[11])){
+        return 5;
+    }else if ((posicionX[2] == posiblesX[12] || posicionX[2] == posiblesX[13])){
+        return 6;
+    }else if ((posicionX[2] == posiblesX[14] || posicionX[2] == posiblesX[15])){
+        return 7;
+    }
+}
+int verificarPosicionY(char* posicionY){
+    char posiblesY[] = {'1','2','3','4','5','6','7','8','\0'};
+    if ((posicionY[1]== posiblesY[0])){
+        return 0;
+    }else if ((posicionY[1]==posiblesY[1])){
+        return 1;
+    }else if ((posicionY[1]==posiblesY[2] )){
+        return 2;
+    }else if ((posicionY[1] == posiblesY[3] )){
+        return 3;
+    }else if ((posicionY[1]== posiblesY[4] )){
+        return 4;
+    }else if ((posicionY[1] == posiblesY[5] )){
+        return 5;
+    }else if ((posicionY[1] == posiblesY[6] )){
+        return 6;
+    }else if (( posicionY[1] == posiblesY[7] )){
+        return 7;
+    }
+} 
