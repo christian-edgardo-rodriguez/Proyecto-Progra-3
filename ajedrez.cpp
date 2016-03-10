@@ -6,30 +6,32 @@
 #include <fstream>
 
 using std::abs;
-using std::cout;
-using std::cin;
-using std::endl;
+using std::ofstream;
+using std::ifstream;
 
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char* string);
 int**newArray();
-void deletePunteros(int** arreglo, int size);
-void llenarMatriz(int** array, int size);
-void imprimirTablero(int** array, int size);
-bool validacionPieza(int** array, int x, int y, int jugador);
-bool movimientoValido(int** array, int posX, int posY, int movX, int movY);
-bool movimientoPeon(int** array, int posX, int posY, int movX, int movY, int bandera, int jugador);
-bool movimientoTorre(int** array, int posX, int posY, int movX, int movY, int jugador);
-bool movimientoAlfil(int** array, int posX, int posY, int movX, int movY, int jugador);
-bool movimientoCaballo(int** array, int posX, int posY, int movX, int movY, int jugador);
-bool movimientoReina(int** array, int posX, int posY, int movX, int movY, int jugador);
-bool movimientoRey(int** array, int posX, int posY, int movX, int movY, int jugador);
-char* movimientoTodos(int numTurnos);
-void deleteMov(char* movimiento);
-void moverTexto(char* movimiento, int turno, int numTurnos);
+void deletePunteros(int** matrizTablero, int size);
+void llenarMatriz(int** matrizTablero, int size);
+void imprimirTablero(int** matrizTablero, int size);
+bool validacionPieza(int** matrizTablero, int x, int y, int jugador);
+bool movimientoValido(int** matrizTablero, int posX, int posY, int movX, int movY);
+bool movimientoPeon(int** matrizTablero, int posX, int posY, int movX, int movY, int bandera, int jugador);
+bool movimientoTorre(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador);
+bool movimientoAlfil(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador);
+bool movimientoCaballo(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador);
+bool movimientoReina(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador);
+bool movimientoRey(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador);
+/*void guardar(int** matrizTablero, int size);
+void cargar(int** matrizTablero, int size);*/
+char* guardarMovimiento(int numCaracteres);
+void deleteArreglo(char* movimiento);
+void adquirirMovimiento(char* movimiento, int turno, int numCaracteres);
 int verificarPosicionX1(char* posicionX);
 int verificarPosicionX2(char* posicionX);
 int verificarPosicionY1(char* posicionY);
 int verificarPosicionY2(char* posicionY);
+//void preguntaGuardarCargar(int** matrizTablero, int size);
 
 int main(int argc, char *argv[]){
 	initscr();
@@ -48,12 +50,13 @@ int main(int argc, char *argv[]){
 		int size=8, bandera=1;	
 		int** tablero=newArray();
 		llenarMatriz(tablero, size);
-		char* agregarPiezas=movimientoTodos(5);
+		char* agregarPiezas=guardarMovimiento(5);
 		do{
 			if (bandera==1){
+				//preguntaGuardarCargar(tablero,size);
 				imprimirTablero(tablero, size);
 				refresh();
-				moverTexto(agregarPiezas, 1, 5);
+				adquirirMovimiento(agregarPiezas, 1, 5);
 				agregarPiezas[0]=verificarPosicionX1(agregarPiezas);
 				agregarPiezas[1]=verificarPosicionY1(agregarPiezas);
 				agregarPiezas[2]=verificarPosicionX2(agregarPiezas);
@@ -99,14 +102,14 @@ int main(int argc, char *argv[]){
 						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==5){
 							bool reina=movimientoReina(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
 							if (reina==true){
-								tablero[agregarPiezas[2]][agregarPiezas[3]]=4;
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=5;
 								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
 								bandera=2;
 							}
 						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==4){
 							bool rey=movimientoRey(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
 							if (rey==true){
-								tablero[agregarPiezas[2]][agregarPiezas[3]]=5;
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=4;
 								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
 								bandera=2;
 							}
@@ -130,10 +133,11 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}else if (bandera==2){
-				agregarPiezas=movimientoTodos(5);
+				//preguntaGuardarCargar(tablero, size);
+				agregarPiezas=guardarMovimiento(5);
 				imprimirTablero(tablero, size);
 				refresh();
-				moverTexto(agregarPiezas, 2, 5);
+				adquirirMovimiento(agregarPiezas, 2, 5);
 				agregarPiezas[0]=verificarPosicionX1(agregarPiezas);
 				agregarPiezas[1]=verificarPosicionY1(agregarPiezas);
 				agregarPiezas[2]=verificarPosicionX2(agregarPiezas);
@@ -177,14 +181,14 @@ int main(int argc, char *argv[]){
 						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==11){
 							bool reina=movimientoReina(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
 							if (reina==true){
-								tablero[agregarPiezas[2]][agregarPiezas[3]]=10;
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=11;
 								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
 								bandera=1;
 							}
 						}else if (tablero[agregarPiezas[0]][agregarPiezas[1]]==10){
 							bool rey=movimientoRey(tablero, agregarPiezas[0], agregarPiezas[1], agregarPiezas[2], agregarPiezas[3], 1);
 							if (rey==true){
-								tablero[agregarPiezas[2]][agregarPiezas[3]]=11;
+								tablero[agregarPiezas[2]][agregarPiezas[3]]=10;
 								tablero[agregarPiezas[0]][agregarPiezas[1]]=0;
 								bandera=1;
 							}
@@ -209,7 +213,7 @@ int main(int argc, char *argv[]){
 				}
 			}
 		}while(win==false);
-		deleteMov(agregarPiezas);
+		deleteArreglo(agregarPiezas);
 		deletePunteros(tablero, size);
 	}		
 }
@@ -235,42 +239,42 @@ void print_in_middle(WINDOW *win, int starty, int startx, int width, char* strin
 }
 int**newArray(){
 	int size=8;
-	int**arreglo= new int*[size];
+	int**matrizTablero= new int*[size];
 	for (int i = 0; i < size; ++i){
-		arreglo[i]=new int[size];
+		matrizTablero[i]=new int[size];
 	}//fin new
-	return arreglo;
+	return matrizTablero;
 }
-void deletePunteros(int** arreglo, int size){
+void deletePunteros(int** matrizTablero, int size){
 	for (int i = 0; i < size; ++i){
-		delete[] arreglo[i];
+		delete[] matrizTablero[i];
 	}
-	delete[] arreglo;//fin delete
+	delete[] matrizTablero;//fin delete
 }
-void llenarMatriz(int** array, int size){
+void llenarMatriz(int** matrizTablero, int size){
 	for (int i = 0; i < size; ++i){
 		for (int j = 0; j < size; ++j){
 			if (i==size-2){
-				array[i][j]=6;
+				matrizTablero[i][j]=6;
 			}else if (i==1){
-				array[i][j]=12;
+				matrizTablero[i][j]=12;
 			}else{
-				array[i][j]=0;
+				matrizTablero[i][j]=0;
 			}
 		}	
 	}
-	array[size-1][0] = array[size-1][size-1] = 1;
-	array[size-1][1] = array[size-1][size-2] = 3;
-	array[size-1][2] = array[size-1][size-3] = 2;
-	array[size-1][size-4] = 4;
-	array[size-1][size-5] = 5;
-	array[0][0] = array[0][size-1] = 7;
-	array[0][1] = array[0][size-2] = 9;
-	array[0][2] = array[0][size-3] = 8;
-	array[0][4] = 10;	
-	array[0][3] = 11;
+	matrizTablero[size-1][0] = matrizTablero[size-1][size-1] = 1;
+	matrizTablero[size-1][1] = matrizTablero[size-1][size-2] = 3;
+	matrizTablero[size-1][2] = matrizTablero[size-1][size-3] = 2;
+	matrizTablero[size-1][size-4] = 4;
+	matrizTablero[size-1][size-5] = 5;
+	matrizTablero[0][0] = matrizTablero[0][size-1] = 7;
+	matrizTablero[0][1] = matrizTablero[0][size-2] = 9;
+	matrizTablero[0][2] = matrizTablero[0][size-3] = 8;
+	matrizTablero[0][4] = 10;	
+	matrizTablero[0][3] = 11;
 }
-void imprimirTablero(int** array, int size){
+void imprimirTablero(int** matrizTablero, int size){
 	initscr();
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
@@ -279,40 +283,40 @@ void imprimirTablero(int** array, int size){
     int movHor = 2,movVer = 1;
 	for (int i = 0; i < size; ++i){
 		for (int j = 0; j < size; ++j){
-			if (array[i][j] == 1){//Blancas
+			if (matrizTablero[i][j] == 1){//Blancas
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4,"[T]");
-			}else if (array[i][j] == 2){
+			}else if (matrizTablero[i][j] == 2){
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[A]");
-			}else if (array[i][j] == 3){
+			}else if (matrizTablero[i][j] == 3){
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[C]");
-			}else if (array[i][j] == 4){
+			}else if (matrizTablero[i][j] == 4){
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[R]");
-			}else if (array[i][j] == 5){
+			}else if (matrizTablero[i][j] == 5){
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[Q]");				
-			}else if (array[i][j] == 6){
+			}else if (matrizTablero[i][j] == 6){
 				attron(COLOR_PAIR(2));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[P]");
-			}else if (array[i][j] == 7){//Negras
+			}else if (matrizTablero[i][j] == 7){//Negras
 			    attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4,"[T]");
-			}else if (array[i][j] == 8){
+			}else if (matrizTablero[i][j] == 8){
 				attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[A]");
-			}else if (array[i][j] == 9){
+			}else if (matrizTablero[i][j] == 9){
 				attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[C]");
-			}else if (array[i][j] == 10){
+			}else if (matrizTablero[i][j] == 10){
 				attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[R]");
-			}else if (array[i][j] == 11){
+			}else if (matrizTablero[i][j] == 11){
 				attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[Q]");
-			}else if (array[i][j] == 12){
+			}else if (matrizTablero[i][j] == 12){
 				attron(COLOR_PAIR(1));
 				mvprintw((i+movVer)*2,(j+movHor)*4, "[P]");
 			}else{
@@ -322,43 +326,43 @@ void imprimirTablero(int** array, int size){
 		}
 	}
 }
-bool validacionPieza(int** array, int x, int y, int jugador){
+bool validacionPieza(int** matrizTablero, int x, int y, int jugador){
 	if (jugador==1){
-		if (array[x][y]!=1&&array[x][y]!=2&&array[x][y]!=3&&array[x][y]!=4&&array[x][y]!=5&&array[x][y]!=6){
+		if (matrizTablero[x][y]!=1&&matrizTablero[x][y]!=2&&matrizTablero[x][y]!=3&&matrizTablero[x][y]!=4&&matrizTablero[x][y]!=5&&matrizTablero[x][y]!=6){
 			return true;
 		}
 	}else if (jugador==2){
-		if (array[x][y]!=7&&array[x][y]!=8&&array[x][y]!=9&&array[x][y]!=10&&array[x][y]!=11&&array[x][y]!=12){
+		if (matrizTablero[x][y]!=7&&matrizTablero[x][y]!=8&&matrizTablero[x][y]!=9&&matrizTablero[x][y]!=10&&matrizTablero[x][y]!=11&&matrizTablero[x][y]!=12){
 			return true;
 		}
 	}
 	return false;
 }
-bool movimientoValido(int** array, int posX, int posY, int movX, int movY){
+bool movimientoValido(int** matrizTablero, int posX, int posY, int movX, int movY){
 	int absX = posY - movY;
 	int absY = posX - movX;
 	if(absX == 0){ //Movimiento Vertical 
 		for(int i = 1;i < abs(absY); i++){
-			if(array[movX][movY]!=0){
+			if(matrizTablero[movX][movY]!=0){
 				return false;
 			}
 		}
 	}else if(absY == 0){ //Movimiento Horizontal
 		for(int i = 1; i < abs(absX); i++){
-			if(array[movX][movY]!=0){
+			if(matrizTablero[movX][movY]!=0){
 				return false;
 			}
 		}        
 	}else if(abs(absX) == abs(absY)){ //Movimiento diagonal
 		for(int i = 1; i < abs(absY); i++){
-			if(array[movX][movY]!=0){
+			if(matrizTablero[movX][movY]!=0){
 				return false;
 			}
 		}
 	}
 	return true;
 }
-bool movimientoPeon(int** array, int posX, int posY, int movX, int movY, int bandera, int jugador){
+bool movimientoPeon(int** matrizTablero, int posX, int posY, int movX, int movY, int bandera, int jugador){
 	int absY = posY - movY;
 	int absX = posX - movX;
 	if(abs(absX) == 1){ //Movida Vertical       
@@ -369,30 +373,30 @@ bool movimientoPeon(int** array, int posX, int posY, int movX, int movY, int ban
 		if(bandera==1){
 			return true;
 		}
-	}else if((abs(absY) == 1)&& (array[movX][movY]==0)){//Movida para comer
+	}else if((abs(absY) == 1)&& (matrizTablero[movX][movY]==0)){//Movida para comer
 		if (jugador==1){
-        	if (array[movX-1][movY]==7||array[movX-1][movY]==8||array[movX-1][movY]==9||array[movX-1][movY]==10||array[movX-1][movY]==11||array[movX-1][movY]==12){
+        	if (matrizTablero[movX-1][movY]==7||matrizTablero[movX-1][movY]==8||matrizTablero[movX-1][movY]==9||matrizTablero[movX-1][movY]==10||matrizTablero[movX-1][movY]==11||matrizTablero[movX-1][movY]==12){
         		return true;
 			}
         }else if(jugador==2){
-        	if (array[movX+1][movY]==1||array[movX+1][movY]==2||array[movX+1][movY]==3||array[movX+1][movY]==4||array[movX+1][movY]==5||array[movX+1][movY]==6){
+        	if (matrizTablero[movX+1][movY]==1||matrizTablero[movX+1][movY]==2||matrizTablero[movX+1][movY]==3||matrizTablero[movX+1][movY]==4||matrizTablero[movX+1][movY]==5||matrizTablero[movX+1][movY]==6){
         		return true;
 			}
         }
 	}
     return false;
 }
-bool movimientoTorre(int** array, int posX, int posY, int movX, int movY, int jugador){
+bool movimientoTorre(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador){
     int absY = posY - movY;
     int absX = posX - movX;
     if((absX == 0) || (absY == 0) ){
-        if(movimientoValido(array, posX,posY, movX, movY)){            
+        if(movimientoValido(matrizTablero, posX,posY, movX, movY)){            
             if (jugador==1){
-	        	if (array[movX][movY]!=1||array[movX][movY]!=2||array[movX][movY]!=3||array[movX][movY]!=4||array[movX][movY]!=5||array[movX][movY]!=6){
+	        	if (matrizTablero[movX][movY]!=1||matrizTablero[movX][movY]!=2||matrizTablero[movX][movY]!=3||matrizTablero[movX][movY]!=4||matrizTablero[movX][movY]!=5||matrizTablero[movX][movY]!=6){
 					return true;
 				}
 	        }else if(jugador==2){
-	        	if (array[movX][movY]!=7||array[movX][movY]!=8||array[movX][movY]!=9||array[movX][movY]!=10||array[movX][movY]!=11||array[movX][movY]!=12){
+	        	if (matrizTablero[movX][movY]!=7||matrizTablero[movX][movY]!=8||matrizTablero[movX][movY]!=9||matrizTablero[movX][movY]!=10||matrizTablero[movX][movY]!=11||matrizTablero[movX][movY]!=12){
 	        		return true;
 				}
 	        }
@@ -400,17 +404,17 @@ bool movimientoTorre(int** array, int posX, int posY, int movX, int movY, int ju
     }
     return false;
 }
-bool movimientoAlfil(int** array, int posX, int posY, int movX, int movY, int jugador){
+bool movimientoAlfil(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador){
     int absY = posY - movY;
     int absX = posX - movX;
     if(abs(absX)==abs(absY)){
-        if(movimientoValido(array, posX,posY, movX, movY)){            
+        if(movimientoValido(matrizTablero, posX,posY, movX, movY)){            
             if (jugador==1){
-	        	if (array[movX][movY]!=1||array[movX][movY]!=2||array[movX][movY]!=3||array[movX][movY]!=4||array[movX][movY]!=5||array[movX][movY]!=6){
+	        	if (matrizTablero[movX][movY]!=1||matrizTablero[movX][movY]!=2||matrizTablero[movX][movY]!=3||matrizTablero[movX][movY]!=4||matrizTablero[movX][movY]!=5||matrizTablero[movX][movY]!=6){
 					return true;
 				}
 	        }else if(jugador==2){
-	        	if (array[movX][movY]!=7||array[movX][movY]!=8||array[movX][movY]!=9||array[movX][movY]!=10||array[movX][movY]!=11||array[movX][movY]!=12){
+	        	if (matrizTablero[movX][movY]!=7||matrizTablero[movX][movY]!=8||matrizTablero[movX][movY]!=9||matrizTablero[movX][movY]!=10||matrizTablero[movX][movY]!=11||matrizTablero[movX][movY]!=12){
 	        		return true;
 				}
 	        }
@@ -418,36 +422,36 @@ bool movimientoAlfil(int** array, int posX, int posY, int movX, int movY, int ju
     }
     return false;
 }
-bool movimientoCaballo(int** array, int posX, int posY, int movX, int movY, int jugador){
+bool movimientoCaballo(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador){
 	int absY = posY - movY;
 	int absX = posX - movX;
 	if(((abs(absX) == 2) && (abs(absY) == 1))||((abs(absX) == 1) && (abs(absY) == 2))){
 		if (jugador==1){
-        	if (array[movX][movY]!=1||array[movX][movY]!=2||array[movX][movY]!=3||array[movX][movY]!=4||array[movX][movY]!=5||array[movX][movY]!=6){
+        	if (matrizTablero[movX][movY]!=1||matrizTablero[movX][movY]!=2||matrizTablero[movX][movY]!=3||matrizTablero[movX][movY]!=4||matrizTablero[movX][movY]!=5||matrizTablero[movX][movY]!=6){
 				return true;
 			}
         }else if(jugador==2){
-        	if (array[movX][movY]!=7||array[movX][movY]!=8||array[movX][movY]!=9||array[movX][movY]!=10||array[movX][movY]!=11||array[movX][movY]!=12){
+        	if (matrizTablero[movX][movY]!=7||matrizTablero[movX][movY]!=8||matrizTablero[movX][movY]!=9||matrizTablero[movX][movY]!=10||matrizTablero[movX][movY]!=11||matrizTablero[movX][movY]!=12){
         		return true;
 			}
         }
     }
     return false;
 }
-bool movimientoReina(int** array, int posX, int posY, int movX, int movY, int jugador){
-	return (movimientoTorre(array, posX, posY, movX, movY, jugador)||movimientoAlfil(array, posX, posY, movX, movY, jugador));
+bool movimientoReina(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador){
+	return (movimientoTorre(matrizTablero, posX, posY, movX, movY, jugador)||movimientoAlfil(matrizTablero, posX, posY, movX, movY, jugador));
 }
-bool movimientoRey(int** array, int posX, int posY, int movX, int movY, int jugador){
+bool movimientoRey(int** matrizTablero, int posX, int posY, int movX, int movY, int jugador){
     int absY = posY - movY;
     int absX = posX - movX;
     if(abs(absX)==1&&(abs(absY)==1)){
-        if(movimientoValido(array, posX,posY, movX, movY)){            
+        if(movimientoValido(matrizTablero, posX,posY, movX, movY)){            
             if (jugador==1){
-	        	if (array[movX][movY]!=1||array[movX][movY]!=2||array[movX][movY]!=3||array[movX][movY]!=4||array[movX][movY]!=5||array[movX][movY]!=6){
+	        	if (matrizTablero[movX][movY]!=1||matrizTablero[movX][movY]!=2||matrizTablero[movX][movY]!=3||matrizTablero[movX][movY]!=4||matrizTablero[movX][movY]!=5||matrizTablero[movX][movY]!=6){
 					return true;
 				}
 	        }else if(jugador==2){
-	        	if (array[movX][movY]!=7||array[movX][movY]!=8||array[movX][movY]!=9||array[movX][movY]!=10||array[movX][movY]!=11||array[movX][movY]!=12){
+	        	if (matrizTablero[movX][movY]!=7||matrizTablero[movX][movY]!=8||matrizTablero[movX][movY]!=9||matrizTablero[movX][movY]!=10||matrizTablero[movX][movY]!=11||matrizTablero[movX][movY]!=12){
 	        		return true;
 				}
 	        }
@@ -455,13 +459,32 @@ bool movimientoRey(int** array, int posX, int posY, int movX, int movY, int juga
     }
     return false;
 }
-char* movimientoTodos(int numTurnos){
-    char* movimiento = new char[numTurnos]; 
+/*void guardar(int** matrizTablero, int size){
+	ofstream file("partidaAjedrez.txt");
+	for (int i = 0; i < size; ++i){
+		for (int j = 0; j < size; ++j){
+			file<<matrizTablero[i][j];
+		}
+	}
+	file.flush();
+	file.close();
+} 
+void cargar(int** matrizTablero, int size){
+	ifstream file("partidaAjedrez.txt");
+	for (int i = 0; i < size; ++i){
+		for (int j = 0; j < size; ++j){
+			file>>matrizTablero[i][j];
+		}
+	}
+	file.close();
+}*/ 
+char* guardarMovimiento(int numCaracteres){
+    char* movimiento = new char[numCaracteres]; 
     return movimiento;
 }
-void moverTexto(char* movimiento, int turno, int numTurnos){
+void adquirirMovimiento(char* movimiento, int turno, int numCaracteres){
 	int contador = 0;
-    while(contador < (numTurnos -1)){
+    while(contador < (numCaracteres -1)){
         noecho();
         char temp;
         temp = getch();
@@ -478,9 +501,9 @@ void moverTexto(char* movimiento, int turno, int numTurnos){
             contador++;
         }
     }
-    movimiento[numTurnos] = '\0';
+    movimiento[numCaracteres] = '\0';
 }
-void deleteMov(char* movimiento){    
+void deleteArreglo(char* movimiento){    
     delete [] movimiento;
 }
 int verificarPosicionX1(char* posicionX){//evitar segmentation fault
@@ -562,4 +585,17 @@ int verificarPosicionY2(char* posicionY){
     }else if ((posicionY[3] == posiblesY[7] )){
         return 7;
     }
-} 
+}
+/*void preguntaGuardarCargar(int** matrizTablero, int size){
+	char string[25];
+	print_in_middle(stdscr, LINES / 2+10, -6, 0, strcpy(string,"Desea guardar la partida, cargar la partida, o seguir jugando? [W/L] "));
+	print_in_middle(stdscr, LINES / 2+12, -6, 0, strcpy(string,"Cualquier otra tecla seguira el juego"));
+	char temp;
+	temp=getch();
+	if (temp==87||temp==119){
+		guardar(matrizTablero, size);
+	}
+	if(temp==76||temp==108){
+		cargar(matrizTablero, size);
+	}
+}*/
